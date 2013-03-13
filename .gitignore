@@ -1,0 +1,13 @@
+blib/
+pm_to_blib
+Makefile
+Makefile.old
+*.tar.gz
+inc/
+MANIFEST
+META.yml
+README
+RT-Extension-CustomerGroups-*
+.*.swp
+MYMETA.json
+MYMETA.yml
