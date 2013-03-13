@@ -1,0 +1,10 @@
+\.git/
+\.gitignore
+.*\.o
+pm_to_blib
+blib/
+README.GIT
+MANIFEST.SKIP
+RT-Extension-CustomerGroups-.*
+\..*\.swp
+README.md
