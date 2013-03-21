@@ -76,19 +76,13 @@ process.
  #
  Set(@Plugins, qw(RT::Extension::CustomerGroups));
 
- # Add the mail gateway plugin to transform requestor users to requestor
- # groups when mail is received. Auth::MailFrom is the default RT mail plugin;
- # it or another plugin must run before Auth::CustomerGroup .
- #
- Set(@MailPlugins, qw(Auth::MailFrom Auth::CustomerGroup));
-
 You can now apply the actions to scrips. The blank template may be used as the
 template is not used for anything.
 
-Please read L<RT::Interface::Email::Auth::CustomerGroup> for details on the
-mail plugin. You don't have to use the mail plugin, but if you don't then new
-tickets coming in via email won't have the requestor changed until a scrip runs
-on them I<after> creation notification emails have been sent.
+RT's scrips are run in I<alphabetical order>. You probably want to name your
+scrip something like 00customergroups so that it runs before the email
+notification scrip, otherwise the submitting user will get an email alert
+but other users in their customer group(s) won't.
 
 =head1 AUTHOR 
 
