@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use RT::Extension::CustomerGroups;
 
-use base qw(RT::Action);
+use base qw(RT::Action::SendEmail);
 
 =head1 NAME
 
@@ -20,9 +20,15 @@ associated customer groups.
 
 The argument must be one or more comma-separated values from the list:
 
-    Requestors
+    Requestor
     Cc
     AdminCc
+
+This action will also expand the customer groups into a list of email
+addresses, removing the original users from the list, and send an email
+using the action's template. So in combination with RT's standard "On
+Create Autoreply To Requestors" scrip, it will send the same email to
+all members of the group when one member raises a ticket.
 
 See L<RT::Extension::CustomerGroups> for details.
 
@@ -38,6 +44,18 @@ sub Prepare {
 	if (!length($self->Argument)) {
 		RT::Logger->error("CustomerGroups: Action requires an argument, see perldoc RT::Extension::CustomerGroups");
 	}
+
+	my %useremailaddresses;
+	for my $arg(split(',', $self->Argument)) {
+		map {++$useremailaddresses{$_}} RT::Extension::CustomerGroups::GetEmailAddressesForGroup($self->TicketObj, $arg);
+		for($self->TicketObj->$arg->MemberEmailAddresses) {
+			delete $useremailaddresses{$_}
+		}
+	}
+
+	push(@{$self->{'To'}}, keys %useremailaddresses);
+	$self->SUPER::Prepare();
+
 	return 1;
 }
 
@@ -47,6 +65,8 @@ sub Commit {
 	for my $arg (split(',', $self->Argument)) {
 		RT::Extension::CustomerGroups::ConvertTicketUsersToGroup($self->TicketObj, $arg);
 	}
+
+	$self->SUPER::Commit();
 	return 1;
 }
 

@@ -32,7 +32,9 @@ and the user in question is a member of one or more customer group(s) the user
 entry is replaced by the customer group(s) found. So if "bob@example.com"
 submits a ticket his Requestor entry will be replaced with an entry for the
 customer group "customer-ExampleDotCom" . If the user is a member of more than
-one customer group all will be added.
+one customer group all will be added. If a non-blank template has been
+associated with the scrip, it will be send to the other members of the group
+but not to the original user.
 
 It is recommended that the customer contacts be given unprivileged accounts,
 and all privileges the customer should have be assigned to the group they're a
@@ -76,21 +78,17 @@ process.
  #
  Set(@Plugins, qw(RT::Extension::CustomerGroups));
 
-You can now apply the actions to scrips. The blank template may be used as the
-template is not used for anything.
-
-RT's scrips are run in I<alphabetical order>. You probably want to name your
-scrip something like 00customergroups so that it runs before the email
-notification scrip, otherwise the submitting user will get an email alert
-but other users in their customer group(s) won't.
+You can now apply the actions to scrips. Typically, you'll want to set the template
+to match the one being sent to the original user at the same time, so that all
+members of the group get the same email.
 
 =head1 AUTHOR 
 
 Craig Ringer <craig@2ndquadrant.com>
 
-=COPYRIGHT 
+=head1 COPYRIGHT 
 
-Copyright 2013 2nd Quadrant
+Copyright 2013, 2015 2nd Quadrant
 
 This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
@@ -150,6 +148,34 @@ sub ConvertTicketUsersToGroup {
                 }
         }
 	RT::Logger->debug("CustomerGroups: Done checking " . $ticketgrouptype);
+}
+
+=head2 GetEmailAddressesForGroup
+
+Takes a ticket and pseudo-group as for ConvertTicketUsersToGroup; returns
+a list of email addresses for the corresponding customer group.
+
+=cut
+
+sub GetEmailAddressesForGroup {
+	my $ticket = shift @_;
+	my $ticketgrouptype = shift @_;
+	my @returnusers;
+
+	$ticketgrouptype = 'Requestors' if ($ticketgrouptype eq 'Requestor');
+
+	($ticketgrouptype =~ /^(Requestors|Cc|AdminCc)$/)
+		|| die ("2nd argument must be one of Requestors|Cc|AdminCc, not $ticketgrouptype");
+	
+	RT::Logger->debug("CustomerGroups: checking email addresses for " . $ticketgrouptype);
+
+	my $tg = $ticket->$ticketgrouptype->UserMembersObj;
+	while (my $u = $tg->Next) {
+		foreach my $g (CustomerGroupsForUser($u)) {
+			push @returnusers, $g->MemberEmailAddresses
+		}
+	}
+	return @returnusers;
 }
 
 =head2 CustomerGroupsForUser
