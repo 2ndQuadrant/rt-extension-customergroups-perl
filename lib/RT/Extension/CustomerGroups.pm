@@ -32,9 +32,7 @@ and the user in question is a member of one or more customer group(s) the user
 entry is replaced by the customer group(s) found. So if "bob@example.com"
 submits a ticket his Requestor entry will be replaced with an entry for the
 customer group "customer-ExampleDotCom" . If the user is a member of more than
-one customer group all will be added. If a non-blank template has been
-associated with the scrip, it will be send to the other members of the group
-but not to the original user.
+one customer group all will be added.
 
 It is recommended that the customer contacts be given unprivileged accounts,
 and all privileges the customer should have be assigned to the group they're a
@@ -78,9 +76,8 @@ process.
  #
  Set(@Plugins, qw(RT::Extension::CustomerGroups));
 
-You can now apply the actions to scrips. Typically, you'll want to set the template
-to match the one being sent to the original user at the same time, so that all
-members of the group get the same email.
+You can now apply the actions to scrips. The actions send no email so
+their templates should be left blank.
 
 =head1 AUTHOR 
 
