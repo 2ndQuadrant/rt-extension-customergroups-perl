@@ -104,7 +104,8 @@ BEGIN {
 =head2 ConvertTicketUsersToGroup
 
 If the passed user is a customer, as determined by its membership in one or more
-customer- groups using CustomerGroupsForUser, add the customer groups
+customer- groups using CustomerGroupsForUser, and if those groups have the
+ReplaceMemberWithGroup custom field set, add the customer groups
 to the ticket's Requestor list and remove the original user.
 
 The 2nd argument must be a comma-separated list of ticket pseudo-group categories:
@@ -116,7 +117,7 @@ The 2nd argument must be a comma-separated list of ticket pseudo-group categorie
 =cut
 
 sub ConvertTicketUsersToGroup {
-        my $ticket = shift @_;
+	my $ticket = shift @_;
 	my $ticketgrouptype = shift @_;
 
 	# Normalize arg that's sometimes plural, sometimes not;
@@ -134,15 +135,13 @@ sub ConvertTicketUsersToGroup {
 
 	my $tg = $ticket->$ticketgrouptype->UserMembersObj;
         while (my $u = $tg->Next) {
-                my @incgroups = CustomerGroupsForUser($u);
-                if (@incgroups) {
-                        foreach my $g (@incgroups) {
-				RT::Logger->debug("CustomerGroups: Adding group " . $g->Name . " to ticket " . $watchertgt);
-                                $ticket->AddWatcher( Type => $watchertgt, PrincipalId => $g->Id );
-                        }
+		foreach my $g (CustomerGroupsForUser($u)) {
+			next unless $g->FirstCustomFieldValue('ReplaceMemberWithGroup') // 0;
+			RT::Logger->debug("CustomerGroups: Adding group " . $g->Name . " to ticket " . $watchertgt);
+			$ticket->AddWatcher( Type => $watchertgt, PrincipalId => $g->Id);
 			RT::Logger->debug("CustomerGroups: Removing user " . $u->Name . " from ticket " . $watchertgt);
-                        $ticket->DeleteWatcher( Type => $watchertgt, PrincipalId => $u->Id);
-                }
+			$ticket->DeleteWatcher( Type => $watchertgt, PrincipalId => $u->Id);
+		}
         }
 	RT::Logger->debug("CustomerGroups: Done checking " . $ticketgrouptype);
 }
