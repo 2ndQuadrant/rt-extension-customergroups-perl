@@ -14,7 +14,6 @@ all_from       'lib/RT/Extension/CustomerGroups.pm';
 build_requires 'Module::Install::AutoManifest'  => '0.003';
 build_requires 'Module::Install::ReadmeFromPod' => '0.20';
 requires       'Carp'                           => 0;
-requires       'SMS::Send'                      => '1.06';
 requires       'Module::Install::RTx'           => '0.30';
 test_requires  'Test::More'                     => '0.47';
 
