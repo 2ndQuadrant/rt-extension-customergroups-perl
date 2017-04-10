@@ -1,0 +1,16 @@
+<%init>
+if( $Path =~ m{^/Admin/Groups} ) {
+	if ( $DECODED_ARGS->{'id'} && $DECODED_ARGS->{'id'} =~ /^(\d+)$/ ) {
+		my $id = $1;
+		my $obj = RT::Group->new( $session{'CurrentUser'} );
+		$obj->Load($id);
+		if( $obj and $obj->Name =~ /^customer-/ ) {
+			my $tabs = PageMenu();
+			$tabs->child( tickets => title => loc('Tickets'), path => "/Admin/Groups/Tickets.html?id=".$id );
+		}
+	}
+}
+</%init>
+<%args>
+$Path
+</%args>

@@ -85,7 +85,7 @@ Craig Ringer <craig@2ndquadrant.com>
 
 =head1 COPYRIGHT 
 
-Copyright 2013, 2015 2nd Quadrant
+Copyright 2013-2017 2nd Quadrant
 
 This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
