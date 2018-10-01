@@ -40,8 +40,9 @@ sub Prepare {
 	# @all_customer_groups now contains all customer groups that any of the original requestors were members of
 
 	for my $customer_group (@all_customer_groups) {
-		my $group_members = $customer_group->CustomFieldValues('AlwaysCc');
-		while(my $principal_id = $group_members->Next->Content) {
+		my $alwayscc_values = $customer_group->CustomFieldValues('AlwaysCc');
+		while(my $alwayscc_value = $alwayscc_values->Next) {
+		  my $principal_id = $alwayscc_value->Content;
 			my $principal = RT::Principal->new( RT->SystemUser );
 			$principal->LoadById($principal_id);
 			if($principal->IsUser()) {
